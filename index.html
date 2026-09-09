@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Fun Learning Spanish - Sentence Jigsaw</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: #f4f9ff;
+      color: #1e293b;
+      padding: 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Informational Banner */
+    .info-card {
+      background: #eff6ff;
+      border: 2px solid #bfdbfe;
+      border-left: 6px solid #3b82f6;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #1e40af;
+      line-height: 1.4;
+    }
+    .info-card strong {
+      color: #1d4ed8;
+      font-weight: 800;
+    }
+
+    /* Controls & Dropdown */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .controls label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #64748b;
+      letter-spacing: 0.05em;
+    }
+    .select-dropdown {
+      width: 100%;
+      padding: 12px 16px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      color: #0f172a;
+      font-size: 1rem;
+      font-weight: 700;
+      outline: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .select-dropdown:focus {
+      border-color: #0ea5e9;
+    }
+
+    /* Target Prompt Card */
+    .target-card {
+      background: #fffbeb;
+      border: 2px solid #fde68a;
+      border-radius: 16px;
+      padding: 18px 14px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.08);
+    }
+    .target-sub {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #b45309;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .target-text {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #78350f;
+    }
+
+    /* Construction Tray */
+    .construction-area {
+      min-height: 105px;
+      background: #ffffff;
+      border: 3px dashed #cbd5e1;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      transition: all 0.25s ease;
+    }
+    .construction-area.correct {
+      border-color: #22c55e;
+      background: #f0fdf4;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+    }
+    .construction-area.wrong {
+      border-color: #ef4444;
+      background: #fef2f2;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+    }
+
+    /* Scrambled Chips Bank */
+    .bank-area {
+      min-height: 90px;
+      padding: 8px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* Word Chips */
+    .chip {
+      background: #0ea5e9;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 4px 0 #0284c7, 0 6px 12px rgba(14, 165, 233, 0.25);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .chip:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #0284c7;
+    }
+
+    /* Slotted Chip (Active in Construction Tray) */
+    .chip.slotted {
+      background: #f97316;
+      color: #ffffff;
+      box-shadow: 0 4px 0 #ea580c;
+    }
+    .chip.slotted:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #ea580c;
+    }
+
+    /* Status Message */
+    .status-box {
+      text-align: center;
+      font-weight: 800;
+      font-size: 1.05rem;
+      min-height: 26px;
+    }
+    .status-correct { color: #16a34a; }
+    .status-wrong { color: #dc2626; }
+
+    /* Action Buttons */
+    .action-btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 16px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: none;
+      letter-spacing: 0.02em;
+    }
+    .next-btn {
+      background: #22c55e;
+      color: #ffffff;
+      box-shadow: 0 5px 0 #16a34a, 0 8px 16px rgba(34, 197, 94, 0.3);
+    }
+    .retry-btn {
+      background: #f59e0b;
+      color: #ffffff;
+      box-shadow: 0 5px 0 #d97706, 0 8px 16px rgba(245, 158, 11, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Explanatory Header -->
+  <div class="info-card">
+    <strong>Personalised Practice:</strong> These sentences are pulled directly from your saved vocabulary list and starter packs. Tap the words in the correct order to recreate the Castilian phrasing.
+  </div>
+
+  <!-- Pack Selector Dropdown -->
+  <div class="controls">
+    <label for="packSelect">Select Vocabulary Source</label>
+    <select id="packSelect" class="select-dropdown" onchange="onPackChange()">
+      <option value="ALL">All Saved Vocab</option>
+    </select>
+  </div>
+
+  <!-- Target English Sentence -->
+  <div class="target-card">
+    <div class="target-sub">Build this sentence:</div>
+    <div class="target-text" id="englishPrompt">Loading...</div>
+  </div>
+
+  <!-- Sentence Assembly Tray -->
+  <div class="construction-area" id="constructionArea"></div>
+
+  <!-- Status / Feedback Message -->
+  <div class="status-box" id="statusBox"></div>
+
+  <!-- Scrambled Words Bank -->
+  <div class="bank-area" id="bankArea"></div>
+
+  <!-- Buttons -->
+  <button id="nextBtn" class="action-btn next-btn" onclick="loadNextSentence()">Next Sentence →</button>
+  <button id="retryBtn" class="action-btn retry-btn" onclick="resetCurrentSentence()">Try Again</button>
+
+  <script>
+    // 1. Audio Effects (Web Audio API - zero external sound files needed)
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playTone(freq, type, duration) {
+      try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function soundTap() { playTone(450, 'sine', 0.08); }
+    function soundRemove() { playTone(300, 'sine', 0.08); }
+    function soundWin() {
+      setTimeout(() => playTone(523.25, 'triangle', 0.15), 0);
+      setTimeout(() => playTone(659.25, 'triangle', 0.15), 120);
+      setTimeout(() => playTone(783.99, 'triangle', 0.28), 240);
+    }
+    function soundWrong() {
+      setTimeout(() => playTone(220, 'sawtooth', 0.15), 0);
+      setTimeout(() => playTone(180, 'sawtooth', 0.25), 140);
+    }
+
+    // 2. Parse URL Parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawPacks = urlParams.get('packs');
+    const rawSentences = urlParams.get('sentences');
+
+    // Default mock data if loaded directly without parameters
+    const defaultData = [
+      { pack: "Tapas y Bar", es: "Voy a tomar una caña con mis amigos", en: "I'm going to have a draught beer with my friends." },
+      { pack: "Tapas y Bar", es: "Ponme una ración de bravas por favor", en: "Get me a portion of spicy potatoes please." },
+      { pack: "Fútbol", es: "El partido empieza a las ocho de la tarde", en: "The match kicks off at eight in the evening." },
+      { pack: "Conversación", es: "¿Tienes tiempo para tomar un café luego?", en: "Do you have time to grab a coffee later?" }
+    ];
+
+    let sentencePool = [];
+    if (rawSentences) {
+      sentencePool = rawSentences.split(';;;').map(item => {
+        const [pack, es, en] = item.split(':::');
+        return { pack: pack?.trim(), es: es?.trim(), en: en?.trim() };
+      }).filter(i => i.es && i.en);
+    } else {
+      sentencePool = defaultData;
+    }
+
+    // 3. Populate Pack Dropdown
+    const packSelect = document.getElementById('packSelect');
+    const availablePacks = rawPacks ? rawPacks.split('|') : [...new Set(sentencePool.map(s => s.pack))];
+    availablePacks.forEach(p => {
+      if (!p) return;
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = `Pack: ${p}`;
+      packSelect.appendChild(opt);
+    });
+
+    // 4. Game State Management
+    let currentFilter = 'ALL';
+    let filteredList = [];
+    let currentSentence = null;
+    let targetTokens = [];
+    let constructedTokens = [];
+    let availableTokens = [];
+
+    const englishPrompt = document.getElementById('englishPrompt');
+    const constructionArea = document.getElementById('constructionArea');
+    const bankArea = document.getElementById('bankArea');
+    const statusBox = document.getElementById('statusBox');
+    const nextBtn = document.getElementById('nextBtn');
+    const retryBtn = document.getElementById('retryBtn');
+
+    function onPackChange() {
+      currentFilter = packSelect.value;
+      filteredList = currentFilter === 'ALL' 
+        ? [...sentencePool] 
+        : sentencePool.filter(s => s.pack === currentFilter);
+
+      if (filteredList.length === 0) {
+        englishPrompt.textContent = "No sentences found for this selection.";
+        constructionArea.innerHTML = '';
+        bankArea.innerHTML = '';
+        return;
+      }
+      loadNextSentence();
+    }
+
+    function loadNextSentence() {
+      nextBtn.style.display = 'none';
+      retryBtn.style.display = 'none';
+      statusBox.textContent = '';
+      constructionArea.className = 'construction-area';
+
+      const randIdx = Math.floor(Math.random() * filteredList.length);
+      currentSentence = filteredList[randIdx];
+
+      englishPrompt.textContent = currentSentence.en;
+      targetTokens = currentSentence.es.split(' ').map((word, idx) => ({ id: idx, text: word }));
+      
+      // Shuffle bank
+      availableTokens = [...targetTokens].sort(() => Math.random() - 0.5);
+      constructedTokens = [];
+
+      render();
+    }
+
+    function resetCurrentSentence() {
+      soundTap();
+      retryBtn.style.display = 'none';
+      statusBox.textContent = '';
+      constructionArea.className = 'construction-area';
+      availableTokens = [...targetTokens].sort(() => Math.random() - 0.5);
+      constructedTokens = [];
+      render();
+    }
+
+    function selectChip(token) {
+      soundTap();
+      availableTokens = availableTokens.filter(t => t.id !== token.id);
+      constructedTokens.push(token);
+      render();
+      checkCompletion();
+    }
+
+    function deselectChip(token) {
+      if (nextBtn.style.display === 'block') return; // Locked when correct
+      soundRemove();
+      constructedTokens = constructedTokens.filter(t => t.id !== token.id);
+      availableTokens.push(token);
+      render();
+      statusBox.textContent = '';
+      constructionArea.className = 'construction-area';
+      retryBtn.style.display = 'none';
+    }
+
+    function checkCompletion() {
+      if (availableTokens.length === 0) {
+        const userString = constructedTokens.map(t => t.text).join(' ');
+        const targetString = targetTokens.map(t => t.text).join(' ');
+
+        if (userString === targetString) {
+          soundWin();
+          constructionArea.classList.add('correct');
+          statusBox.innerHTML = '<span class="status-correct">¡Perfecto! Sentence complete.</span>';
+          nextBtn.style.display = 'block';
+        } else {
+          soundWrong();
+          constructionArea.classList.add('wrong');
+          statusBox.innerHTML = '<span class="status-wrong">Not quite right. Try reordering!</span>';
+          retryBtn.style.display = 'block';
+        }
+      }
+    }
+
+    function render() {
+      // Render Assembly Area
+      constructionArea.innerHTML = '';
+      constructedTokens.forEach(token => {
+        const chip = document.createElement('div');
+        chip.className = 'chip slotted';
+        chip.textContent = token.text;
+        chip.onclick = () => deselectChip(token);
+        constructionArea.appendChild(chip);
+      });
+
+      // Render Word Bank
+      bankArea.innerHTML = '';
+      availableTokens.forEach(token => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.textContent = token.text;
+        chip.onclick = () => selectChip(token);
+        bankArea.appendChild(chip);
+      });
+    }
+
+    // Initialize
+    onPackChange();
+  </script>
+</body>
+</html>
